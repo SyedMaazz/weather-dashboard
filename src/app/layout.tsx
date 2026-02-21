@@ -1,10 +1,4 @@
-import './globals.css';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Weather Dashboard',
-  description: 'Nothing-style weather dashboard built with Next.js',
-};
+import "./globals.css";
 
 export default function RootLayout({
   children,
@@ -12,8 +6,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-black text-white">{children}</body>
+    <html lang="en" className="bg-black">
+      <body className="dot-bg text-text min-h-screen antialiased">
+        {children}
+      </body>
     </html>
   );
 }
