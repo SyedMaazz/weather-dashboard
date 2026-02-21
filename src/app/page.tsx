@@ -1,23 +1,21 @@
-import TopBar from '@/components/TopBar';
-import ForecastStrip from '@/components/ForecastStrip';
-import RainPanel from '@/components/RainPanel';
+import TopBar from "@/components/TopBar";
+import ForecastStrip from "@/components/ForecastStrip";
+import RainPanel from "@/components/RainPanel";
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen px-6 pb-10">
       <TopBar />
 
-      <section className="max-w-[1400px] mx-auto px-6 mt-6 grid grid-cols-12 gap-6">
-        {/* LEFT SIDE */}
-        <div className="col-span-12 lg:col-span-8">
+      <div className="grid grid-cols-12 gap-6 mt-6 items-stretch">
+        <div className="col-span-8">
           <ForecastStrip />
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="col-span-12 lg:col-span-4">
+        <div className="col-span-4">
           <RainPanel />
         </div>
-      </section>
+      </div>
     </main>
   );
 }

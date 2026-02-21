@@ -1,16 +1,87 @@
 @import "tailwindcss";
 
-/* Nothing dotted background */
+/* =========================
+   THEME TOKENS (Tailwind v4)
+   ========================= */
+@theme {
+  --color-bg: #000000;
+  --color-panel: #0f0f0f;
+  --color-border: #2a2a2a;
+  --color-text: #ffffff;
+  --color-muted: #bfbfbf;
+}
+
+/* =========================
+   BASE RESET
+   ========================= */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================
+   NOTHING STYLE DOT GRID
+   ========================= */
 .dot-bg {
-  background-color: #000000;
+  background-color: var(--color-bg);
   background-image: radial-gradient(
-    rgba(255, 255, 255, 0.15) 1px,
+    rgba(255, 255, 255, 0.12) 1px,
     transparent 1px
   );
   background-size: 24px 24px;
 }
 
-/* Ensure full height */
-html, body {
-  height: 100%;
+/* =========================
+   PANEL FIX
+   Ensures cards are visible
+   ========================= */
+.bg-panel {
+  background-color: var(--color-panel);
+}
+
+/* =========================
+   BORDER UTILITY FIX
+   ========================= */
+.border-border {
+  border-color: var(--color-border);
+}
+
+/* =========================
+   TEXT MUTED UTILITY FIX
+   ========================= */
+.text-muted {
+  color: var(--color-muted);
+}
+
+/* =========================
+   SCROLLBAR (OPTIONAL CLEAN)
+   ========================= */
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
