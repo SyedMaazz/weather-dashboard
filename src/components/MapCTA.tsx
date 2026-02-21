@@ -1,27 +1,41 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import "leaflet/dist/leaflet.css";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((m) => m.MapContainer),
+  { ssr: false }
+);
+
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((m) => m.TileLayer),
+  { ssr: false }
+);
+
 export default function MapCTA() {
   return (
-    <div className="relative h-full min-h-[420px] rounded-2xl overflow-hidden border border-border bg-panel">
+    <div className="relative h-full w-full rounded-2xl overflow-hidden border border-border">
+      {/* 🌍 MAP */}
+      <MapContainer
+        center={[26.8467, 80.9462]}
+        zoom={10}
+        scrollWheelZoom={false}
+        className="h-full w-full map-container"
+      >
+        <TileLayer
+          attribution="&copy; OpenStreetMap contributors"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+      </MapContainer>
 
-      {/* 🌍 DYNAMIC MAP (WINDY EMBED) */}
-      <iframe
-        className="absolute inset-0 w-full h-full"
-        src="https://embed.windy.com/embed2.html?lat=26.85&lon=80.95&zoom=5&level=surface&overlay=wind&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=26.85&detailLon=80.95&metricWind=km%2Fh&metricTemp=%C2%B0C"
-        frameBorder="0"
-      />
-
-      {/* 🌫️ DARK OVERLAY for readability */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
-
-      {/* 📝 CONTENT */}
-      <div className="relative h-full flex flex-col justify-between p-6">
-
-        {/* TOP TEXT */}
-        <div className="bg-white/80 text-black text-sm font-semibold rounded-xl px-4 py-3 max-w-[260px]">
+      {/* 🔳 Overlay */}
+      <div className="absolute inset-0 flex flex-col justify-between p-6 bg-black/30">
+        <div className="bg-white/80 text-black text-sm font-medium rounded-xl px-4 py-2 w-fit backdrop-blur">
           Explore global map of wind weather and ocean condition
         </div>
 
-        {/* BUTTON */}
-        <button className="self-start bg-white text-black font-semibold px-6 py-3 rounded-xl">
+        <button className="bg-white text-black font-semibold py-3 rounded-xl">
           GET STARTED
         </button>
       </div>

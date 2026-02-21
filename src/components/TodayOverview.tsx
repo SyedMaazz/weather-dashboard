@@ -11,7 +11,7 @@ export default function TodayOverview() {
           <p className="text-sm text-muted mb-2">Wind Status</p>
 
           {/* BARS */}
-          <div className="flex items-end gap-[3px] h-[50px]">
+          <div className="flex items-end gap-[3px] h-[60px]">
             {[8, 14, 20, 26, 32, 36, 32, 26, 20, 14, 8].map((h, i) => (
               <div
                 key={i}
@@ -28,7 +28,7 @@ export default function TodayOverview() {
         </div>
 
         {/* UV INDEX */}
-        <div className="bg-panel border border-border rounded-2xl p-4 flex flex-col items-center justify-center">
+        <div className="bg-panel border border-border rounded-2xl p-4 h-[200px] flex flex-col items-center justify-center">
           <p className="text-sm text-muted self-start mb-2">UV Index</p>
 
           {/* RING */}
@@ -42,7 +42,7 @@ export default function TodayOverview() {
         </div>
 
         {/* HUMIDITY */}
-        <div className="bg-panel border border-border rounded-2xl p-4 flex flex-col justify-between">
+        <div className="bg-panel border border-border rounded-2xl p-4 h-[200px] flex flex-col justify-between">
           <p className="text-sm text-muted mb-2">Humidity</p>
 
           <div className="flex flex-col items-start gap-2">
