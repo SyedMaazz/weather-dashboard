@@ -7,14 +7,19 @@ export default function Home() {
     <main className="min-h-screen px-6 pb-10">
       <TopBar />
 
-      <div className="grid grid-cols-12 gap-6 mt-6 items-stretch">
-        <div className="col-span-8">
+      {/* 🔧 PIXEL CONTROLLED LAYOUT */}
+      <div className="flex gap-2 mt-6">
+
+        {/* LEFT — ForecastStrip width in px */}
+        <div className="w-[1050px]">
           <ForecastStrip />
         </div>
 
-        <div className="col-span-4">
+        {/* RIGHT — RainPanel width in px */}
+        <div className="w-[450px]">
           <RainPanel />
         </div>
+
       </div>
     </main>
   );
