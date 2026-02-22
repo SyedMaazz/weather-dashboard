@@ -1,3 +1,35 @@
+@font-face {
+  font-family: "Nothing";
+  src: url("/fonts/NType82-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nothing Headline";
+  src: url("/fonts/NType82-Headline.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nothing Mono";
+  src: url("/fonts/NType82Mono-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nothing Dot";
+  src: url("/fonts/Ndot55-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @import "tailwindcss";
 
 /* =========================
@@ -25,6 +57,11 @@ body {
   color: var(--color-text);
   margin: 0;
   padding: 0;
+}
+
+body {
+  font-family: "Nothing Dot", system-ui, sans-serif;
+  letter-spacing: 0.04em;
 }
 
 /* =========================
@@ -80,4 +117,18 @@ body {
 
 .map-container {
   filter: grayscale(100%) brightness(0.7) contrast(1.1);
+}
+
+.nothing-label {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.nothing-metric {
+  letter-spacing: 0.06em;
+}
+
+.nothing-temp {
+  letter-spacing: -0.02em;
 }

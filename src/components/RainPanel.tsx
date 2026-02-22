@@ -9,36 +9,23 @@ export default function RainPanel() {
   ];
 
   return (
-    <section className="bg-panel border border-border rounded-3xl p-6 h-full flex flex-col">
-      <h3 className="text-lg font-semibold mb-6">Chance Of Rain</h3>
+    <section className="bg-panel border border-border rounded-3xl p-6 h-[283.5px] flex flex-col">
+      <h3 className="text-[20px] font-headline tracking-[0.08em] mb-6">
+        Chance Of Rain
+      </h3>
 
       {/* CHART AREA */}
       <div className="relative flex-1">
-        {/* GRID + LABELS CONTAINER */}
-      <div className="absolute inset-0 pt-4 pb-12 flex flex-col justify-between">
-          {/* GRID ROW 1 */}
-          <div className="relative">
-            <span className="absolute left-0 -top-3 text-sm text-muted font-medium">
-              Rainy
-            </span>
-            <div className="border-t border-dashed border-border/70 ml-16" />
-          </div>
-
-          {/* GRID ROW 2 */}
-          <div className="relative">
-            <span className="absolute left-0 -top-3 text-sm text-muted font-medium">
-              Sunny
-            </span>
-            <div className="border-t border-dashed border-border/70 ml-16" />
-          </div>
-
-          {/* GRID ROW 3 */}
-          <div className="relative">
-            <span className="absolute left-0 -top-3 text-sm text-muted font-medium">
-              Heavy
-            </span>
-            <div className="border-t border-dashed border-border/70 ml-16" />
-          </div>
+        {/* GRID + LABELS */}
+        <div className="absolute inset-0 pt-4 pb-12 flex flex-col justify-between">
+          {["Rainy", "Sunny", "Heavy"].map((label) => (
+            <div key={label} className="relative">
+              <span className="absolute left-0 -top-3 text-sm text-muted font-dot tracking-[0.18em]">
+                {label}
+              </span>
+              <div className="border-t border-dashed border-border/70 ml-16" />
+            </div>
+          ))}
         </div>
 
         {/* BARS + TIMES */}
@@ -49,7 +36,7 @@ export default function RainPanel() {
                 className="w-[6px] rounded-full bg-white/80"
                 style={{ height: `${d.value * 1.8}px` }}
               />
-              <span className="text-xs text-muted">{d.time}</span>
+              <span className="text-xs text-muted font-mono">{d.time}</span>
             </div>
           ))}
         </div>

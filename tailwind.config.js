@@ -1,6 +1,17 @@
 export default {
+  content: [
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
+      fontFamily: {
+        nothing: ["Nothing", "sans-serif"],
+        dot: ["Nothing Dot", "sans-serif"],
+        headline: ["Nothing Headline", "sans-serif"],
+        mono: ["Nothing Mono", "monospace"],
+      },
       colors: {
         bg: "#000000",
         panel: "#111111",
