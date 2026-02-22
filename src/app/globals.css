@@ -132,3 +132,16 @@ body {
 .nothing-temp {
   letter-spacing: -0.02em;
 }
+
+.nothing-hover {
+  transition: all 150ms ease-out;
+}
+
+.nothing-hover:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: #ffffff40;
+}
+
+.nothing-glow:hover {
+  box-shadow: 0 0 0 1px #ffffff30 inset;
+}
