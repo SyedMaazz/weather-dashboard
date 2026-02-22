@@ -9,7 +9,7 @@ export default {
       fontFamily: {
         nothing: ["Nothing", "sans-serif"],
         dot: ["Nothing Dot", "sans-serif"],
-        headline: ["Nothing Headline", "sans-serif"],
+      headline: ["NType82Headline", "sans-serif"],
         mono: ["Nothing Mono", "monospace"],
       },
       colors: {

@@ -7,9 +7,9 @@
 }
 
 @font-face {
-  font-family: "Nothing Headline";
+  font-family: "NType82Headline";
   src: url("/fonts/NType82-Headline.otf") format("opentype");
-  font-weight: 600;
+  font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
