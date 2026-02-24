@@ -44,7 +44,7 @@ export default function ForecastStrip() {
           </button>
         </div>
 
-        {/* PIXEL-SAFE SLIDING TOGGLE */}
+        {/* TOGGLE */}
         <div className="relative flex gap-2 bg-panel border border-border rounded-full p-1">
           <div
             className={`
@@ -58,22 +58,18 @@ export default function ForecastStrip() {
 
           <button
             onClick={() => setMode("forecast")}
-            className={`
-              relative z-10 px-4 py-1 text-xs rounded-full
-              transition-colors duration-200
-              ${mode === "forecast" ? "text-black" : "text-muted"}
-            `}
+            className={`relative z-10 px-4 py-1 text-xs rounded-full transition-colors duration-200 ${
+              mode === "forecast" ? "text-black" : "text-muted"
+            }`}
           >
             Forecast
           </button>
 
           <button
             onClick={() => setMode("air")}
-            className={`
-              relative z-10 px-4 py-1 text-xs rounded-full
-              transition-colors duration-200
-              ${mode === "air" ? "text-black" : "text-muted"}
-            `}
+            className={`relative z-10 px-4 py-1 text-xs rounded-full transition-colors duration-200 ${
+              mode === "air" ? "text-black" : "text-muted"
+            }`}
           >
             Air Quality
           </button>
@@ -91,7 +87,7 @@ export default function ForecastStrip() {
 
           <div className="flex items-center justify-between mt-4">
             <h2 className="text-5xl font-medium">16°</h2>
-            <div className="text-3xl">
+            <div>
               <CloudMoon size={40} strokeWidth={1.5} />
             </div>
           </div>
@@ -115,15 +111,39 @@ export default function ForecastStrip() {
         {days.map((d) => (
           <div
             key={d.day}
-            className="w-[150px] bg-panel border border-border rounded-2xl p-4 flex flex-col items-center justify-between"
+            className="
+              group
+              w-[150px]
+              bg-panel
+              border border-border
+              rounded-2xl
+              p-4
+              flex flex-col items-center justify-between
+              transition-all duration-150
+              hover:bg-white/[0.04]
+              hover:border-white/40
+              transform hover:scale-[1.04]
+              will-change-transform
+            "
           >
-            <p className="text-sm text-white/80">{d.day}</p>
+            <p className="text-sm text-white/80 transition-colors duration-150 group-hover:text-white">
+              {d.day}
+            </p>
 
-            <div className="text-2xl my-4 text-white/80">
+            <div
+              className="
+                text-2xl my-4 text-white/80
+                transition-all duration-150
+                group-hover:text-white
+                group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.65)]
+              "
+            >
               {d.icon}
             </div>
 
-            <p className="text-lg font-medium">{d.temp}</p>
+            <p className="text-lg font-medium transition-colors duration-150 group-hover:text-white">
+              {d.temp}
+            </p>
           </div>
         ))}
       </div>
