@@ -1,16 +1,35 @@
 "use client";
 import { useState } from "react";
+import {
+  Sun,
+  Moon,
+  Cloud,
+  CloudSun,
+  CloudMoon,
+  CloudRain,
+  CloudDrizzle,
+  CloudSnow,
+  CloudHail,
+  CloudLightning,
+  CloudFog,
+  Wind,
+  Droplets,
+  Eye,
+  SunMedium,
+  Thermometer,
+  Navigation,
+} from "lucide-react";
 
 export default function ForecastStrip() {
   const [mode, setMode] = useState<"forecast" | "air">("forecast");
 
   const days = [
-    { day: "SAT", temp: "10°" },
-    { day: "SUN", temp: "15°" },
-    { day: "MON", temp: "11°" },
-    { day: "TUE", temp: "10°" },
-    { day: "WED", temp: "12°" },
-    { day: "THU", temp: "10°" },
+    { day: "SAT", temp: "10°", icon: <Cloud strokeWidth={1.5} /> },
+    { day: "SUN", temp: "15°", icon: <Sun strokeWidth={1.5} /> },
+    { day: "MON", temp: "11°", icon: <CloudSun strokeWidth={1.5} /> },
+    { day: "TUE", temp: "10°", icon: <CloudRain strokeWidth={1.5} /> },
+    { day: "WED", temp: "12°", icon: <CloudDrizzle strokeWidth={1.5} /> },
+    { day: "THU", temp: "10°", icon: <CloudLightning strokeWidth={1.5} /> },
   ];
 
   return (
@@ -25,10 +44,8 @@ export default function ForecastStrip() {
           </button>
         </div>
 
-        {/* 🔥 PIXEL-SAFE SLIDING TOGGLE */}
+        {/* PIXEL-SAFE SLIDING TOGGLE */}
         <div className="relative flex gap-2 bg-panel border border-border rounded-full p-1">
-          
-          {/* SLIDING WHITE PILL — same inner height as before */}
           <div
             className={`
               absolute top-1 bottom-1 left-1
@@ -39,7 +56,6 @@ export default function ForecastStrip() {
             `}
           />
 
-          {/* FORECAST */}
           <button
             onClick={() => setMode("forecast")}
             className={`
@@ -51,7 +67,6 @@ export default function ForecastStrip() {
             Forecast
           </button>
 
-          {/* AIR QUALITY */}
           <button
             onClick={() => setMode("air")}
             className={`
@@ -76,7 +91,9 @@ export default function ForecastStrip() {
 
           <div className="flex items-center justify-between mt-4">
             <h2 className="text-5xl font-medium">16°</h2>
-            <div className="text-3xl">⛅</div>
+            <div className="text-3xl">
+              <CloudMoon size={40} strokeWidth={1.5} />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mt-4 text-xs">
@@ -101,7 +118,11 @@ export default function ForecastStrip() {
             className="w-[150px] bg-panel border border-border rounded-2xl p-4 flex flex-col items-center justify-between"
           >
             <p className="text-sm text-white/80">{d.day}</p>
-            <div className="text-2xl my-4">☁️</div>
+
+            <div className="text-2xl my-4 text-white/80">
+              {d.icon}
+            </div>
+
             <p className="text-lg font-medium">{d.temp}</p>
           </div>
         ))}
