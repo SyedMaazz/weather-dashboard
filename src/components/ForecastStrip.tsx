@@ -1,4 +1,9 @@
+"use client";
+import { useState } from "react";
+
 export default function ForecastStrip() {
+  const [mode, setMode] = useState<"forecast" | "air">("forecast");
+
   const days = [
     { day: "SAT", temp: "10°" },
     { day: "SUN", temp: "15°" },
@@ -9,7 +14,6 @@ export default function ForecastStrip() {
   ];
 
   return (
-    // 🔧 This makes the strip take MORE horizontal space
     <section className="w-full pr-2">
       {/* TOP ROW */}
       <div className="flex items-center justify-between mb-6">
@@ -21,24 +25,50 @@ export default function ForecastStrip() {
           </button>
         </div>
 
-        <div className="flex gap-2 bg-panel border border-border rounded-full p-1">
-          <button className="px-4 py-1 text-xs bg-white text-black rounded-full">
+        {/* 🔥 PIXEL-SAFE SLIDING TOGGLE */}
+        <div className="relative flex gap-2 bg-panel border border-border rounded-full p-1">
+          
+          {/* SLIDING WHITE PILL — same inner height as before */}
+          <div
+            className={`
+              absolute top-1 bottom-1 left-1
+              w-[calc(50%-4px)]
+              rounded-full bg-white
+              transition-transform duration-200 ease-out
+              ${mode === "air" ? "translate-x-full" : "translate-x-0"}
+            `}
+          />
+
+          {/* FORECAST */}
+          <button
+            onClick={() => setMode("forecast")}
+            className={`
+              relative z-10 px-4 py-1 text-xs rounded-full
+              transition-colors duration-200
+              ${mode === "forecast" ? "text-black" : "text-muted"}
+            `}
+          >
             Forecast
           </button>
-          <button className="px-4 py-1 text-xs text-muted">
+
+          {/* AIR QUALITY */}
+          <button
+            onClick={() => setMode("air")}
+            className={`
+              relative z-10 px-4 py-1 text-xs rounded-full
+              transition-colors duration-200
+              ${mode === "air" ? "text-black" : "text-muted"}
+            `}
+          >
             Air Quality
           </button>
         </div>
       </div>
 
       {/* CARDS ROW */}
-      {/* 🔧 Reduced gap so strip becomes wider overall */}
       <div className="flex items-stretch gap-2 w-full">
-        
         {/* TODAY CARD */}
-        {/* 🔧 Increase width here to grow whole strip */}
         <div className="w-[340px] bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
-          
           <div className="flex justify-between text-sm text-white/80">
             <span>Friday</span>
             <span>11:45 AM</span>
@@ -49,23 +79,14 @@ export default function ForecastStrip() {
             <div className="text-3xl">⛅</div>
           </div>
 
-          {/* INFO GRID */}
           <div className="grid grid-cols-2 gap-4 mt-4 text-xs">
-            
-            {/* LEFT COLUMN */}
             <div className="space-y-1 text-white/80">
               <p>Real Feel 18°</p>
-
-              {/* ✅ km/h WILL NEVER BREAK NOW */}
-              <p className="whitespace-nowrap">
-                Wind N-E 6-7 km/h
-              </p>
-
+              <p className="whitespace-nowrap">Wind N-E 6-7 km/h</p>
               <p>Pressure 100MB</p>
               <p>Humidity 51%</p>
             </div>
 
-            {/* RIGHT COLUMN */}
             <div className="space-y-1 text-white/80 text-right">
               <p>Sunrise 5:30AM</p>
               <p>Sunset 6:45</p>
@@ -77,13 +98,10 @@ export default function ForecastStrip() {
         {days.map((d) => (
           <div
             key={d.day}
-            /* 🔧 Slightly wider small cards to extend strip */
             className="w-[150px] bg-panel border border-border rounded-2xl p-4 flex flex-col items-center justify-between"
           >
             <p className="text-sm text-white/80">{d.day}</p>
-
             <div className="text-2xl my-4">☁️</div>
-
             <p className="text-lg font-medium">{d.temp}</p>
           </div>
         ))}
