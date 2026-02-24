@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import {
   Sun,
   Moon,
@@ -22,6 +22,35 @@ import {
 
 export default function ForecastStrip() {
   const [mode, setMode] = useState<"forecast" | "air">("forecast");
+  const [activeTab, setActiveTab] = useState<"today" | "tomorrow" | "next">(
+    "next",
+  );
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = {
+    today: useRef<HTMLButtonElement>(null),
+    tomorrow: useRef<HTMLButtonElement>(null),
+    next: useRef<HTMLButtonElement>(null),
+  };
+
+  const [underlineStyle, setUnderlineStyle] = useState({ width: 0, x: 0 });
+
+  useLayoutEffect(() => {
+    const el = tabRefs[activeTab].current;
+    const parent = containerRef.current;
+
+    if (el && parent) {
+      const parentRect = parent.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
+
+      const extra = 12; // total extra width (6px each side)
+
+      setUnderlineStyle({
+        width: rect.width + extra,
+        x: rect.left - parentRect.left - extra / 2,
+      });
+    }
+  }, [activeTab]);
 
   const days = [
     { day: "SAT", temp: "10°", icon: <Cloud strokeWidth={1.5} /> },
@@ -36,15 +65,55 @@ export default function ForecastStrip() {
     <section className="w-full pr-2">
       {/* TOP ROW */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex gap-6 text-sm">
-          <button className="text-white">Today</button>
-          <button className="text-muted hover:text-white">Tomorrow</button>
-          <button className="text-white font-semibold border-b border-white pb-1">
+        {/* 🔥 TABS */}
+        <div ref={containerRef} className="relative flex gap-6 text-sm">
+          {/* UNDERLINE */}
+          <span
+            className="absolute bottom-0 h-[1px] bg-white transition-all duration-300 ease-out"
+            style={{
+              width: underlineStyle.width,
+              transform: `translateX(${underlineStyle.x}px)`,
+            }}
+          />
+
+          <button
+            ref={tabRefs.today}
+            onClick={() => setActiveTab("today")}
+            className={`pb-1 transition-all duration-200 ${
+              activeTab === "today"
+                ? "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.6)] -translate-y-[1px]"
+                : "text-muted hover:text-white"
+            }`}
+          >
+            Today
+          </button>
+
+          <button
+            ref={tabRefs.tomorrow}
+            onClick={() => setActiveTab("tomorrow")}
+            className={`pb-1 transition-all duration-200 ${
+              activeTab === "tomorrow"
+                ? "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.6)] -translate-y-[1px]"
+                : "text-muted hover:text-white"
+            }`}
+          >
+            Tomorrow
+          </button>
+
+          <button
+            ref={tabRefs.next}
+            onClick={() => setActiveTab("next")}
+            className={`pb-1 transition-all duration-200 ${
+              activeTab === "next"
+                ? "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.6)] -translate-y-[1px]"
+                : "text-muted hover:text-white"
+            }`}
+          >
             Next 7days
           </button>
         </div>
 
-        {/* TOGGLE */}
+        {/* TOGGLE — UNCHANGED */}
         <div className="relative flex gap-2 bg-panel border border-border rounded-full p-1">
           <div
             className={`
@@ -76,7 +145,7 @@ export default function ForecastStrip() {
         </div>
       </div>
 
-      {/* CARDS ROW */}
+      {/* CARDS ROW — UNCHANGED */}
       <div className="flex items-stretch gap-2 w-full">
         {/* TODAY CARD */}
         <div className="w-[340px] bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
