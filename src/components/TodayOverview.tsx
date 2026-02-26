@@ -8,7 +8,6 @@ export default function TodayOverview() {
         <div className="bg-panel border border-border rounded-2xl p-4 flex flex-col justify-between">
           <p className="text-sm text-muted mb-2">Air quality</p>
 
-          {/* DOT MATRIX */}
           <div className="grid grid-cols-10 gap-[6px] py-2">
             {Array.from({ length: 50 }).map((_, i) => (
               <div
@@ -25,49 +24,19 @@ export default function TodayOverview() {
           </p>
         </div>
 
-        {/* UV INDEX (UNCHANGED VISUALLY) */}
         <div className="bg-panel border border-border rounded-2xl p-4 h-[200px] flex flex-col justify-between">
           <p className="text-sm text-muted mb-2">UV Index</p>
 
-          {/* ARC STACK (Nothing style) */}
-          <div className="flex flex-col items-center justify-center flex-1">
-            <svg width="120" height="80" viewBox="0 0 120 80">
-              <path
-                d="M20 60 Q60 10 100 60"
-                stroke="white"
-                strokeOpacity="0.15"
-                fill="none"
-              />
-              <path
-                d="M25 60 Q60 20 95 60"
-                stroke="white"
-                strokeOpacity="0.25"
-                fill="none"
-              />
-              <path
-                d="M30 60 Q60 30 90 60"
-                stroke="white"
-                strokeOpacity="0.35"
-                fill="none"
-              />
-              <path
-                d="M35 60 Q60 40 85 60"
-                stroke="white"
-                strokeOpacity="0.5"
-                fill="none"
-              />
-              <path
-                d="M40 60 Q60 45 80 60"
-                stroke="white"
-                strokeOpacity="0.7"
-                fill="none"
-              />
-            </svg>
+          <div className="flex items-center justify-center flex-1">
+            <img
+              src="/images/uv_index.svg"
+              alt="UV Index"
+              className="w-[140px] h-[80px] object-contain"
+            />
           </div>
 
-          {/* VALUE BELOW — aligned like other cards */}
           <p className="text-sm text-white text-center">
-            00 <span className="text-muted">• Low</span>
+            04 <span className="text-muted">• Moderate</span>
           </p>
         </div>
 
@@ -76,12 +45,8 @@ export default function TodayOverview() {
           <p className="text-sm text-muted mb-2">Wind speed</p>
 
           <div className="flex flex-col items-center justify-center flex-1">
-            {/* COMPASS CIRCLE */}
             <div className="relative w-[90px] h-[90px] rounded-full border border-white/40 flex items-center justify-center">
-              {/* DIRECTION TICK */}
               <div className="absolute top-[14px] right-[22px] w-[2px] h-[14px] bg-red-500 rotate-45" />
-
-              {/* LABEL */}
               <span className="absolute top-[6px] right-[10px] text-[10px] text-red-500">
                 NE
               </span>
@@ -93,11 +58,10 @@ export default function TodayOverview() {
           </p>
         </div>
 
-        {/* VISIBILITY (UNCHANGED STRUCTURE) */}
+        {/* VISIBILITY */}
         <div className="bg-panel border border-border rounded-2xl p-4 flex flex-col justify-between">
           <p className="text-sm text-muted mb-2">Visibility</p>
 
-          {/* ARC LINES */}
           <div className="flex flex-col items-center justify-center flex-1">
             <svg width="120" height="60" viewBox="0 0 120 60">
               <path
