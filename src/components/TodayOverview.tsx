@@ -47,7 +47,7 @@ export default function TodayOverview() {
           <div className="flex flex-col items-center justify-center flex-1">
             <div className="relative w-[90px] h-[90px] rounded-full border border-white/40 flex items-center justify-center">
               <div className="absolute top-[14px] right-[22px] w-[2px] h-[14px] bg-red-500 rotate-45" />
-              <span className="absolute top-[6px] right-[10px] text-[10px] text-red-500">
+              <span className="absolute top-[-1px] right-[-1px] text-[10px] text-red-500">
                 NE
               </span>
             </div>
