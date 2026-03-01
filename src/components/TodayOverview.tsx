@@ -8,15 +8,23 @@ export default function TodayOverview() {
         <div className="bg-panel border border-border rounded-2xl p-4 flex flex-col justify-between">
           <p className="text-sm text-muted mb-2">Air quality</p>
 
-          <div className="grid grid-cols-10 gap-[6px] py-2">
-            {Array.from({ length: 50 }).map((_, i) => (
-              <div
-                key={i}
-                className={`w-[4px] h-[4px] rounded-full ${
-                  i > 40 ? "bg-white/20" : "bg-white/80"
-                }`}
-              />
-            ))}
+          <div className="grid grid-cols-12 gap-[6px] py-2">
+            {Array.from({ length: 72 }).map((_, i) => {
+              const col = i % 12;
+
+              let opacityClass = "bg-white/90"; // bright default
+
+              if (col === 9) opacityClass = "bg-white/60"; // medium column
+              if (col === 10) opacityClass = "bg-white/35"; // faint column
+              if (col === 11) opacityClass = "bg-white/15"; // ghost column
+
+              return (
+                <div
+                  key={i}
+                  className={`w-[4px] h-[4px] rounded-full ${opacityClass}`}
+                />
+              );
+            })}
           </div>
 
           <p className="text-sm text-white">
@@ -24,6 +32,7 @@ export default function TodayOverview() {
           </p>
         </div>
 
+        {/* UV INDEX */}
         <div className="bg-panel border border-border rounded-2xl p-4 h-[200px] flex flex-col justify-between">
           <p className="text-sm text-muted mb-2">UV Index</p>
 
@@ -61,36 +70,52 @@ export default function TodayOverview() {
         {/* VISIBILITY */}
         <div className="bg-panel border border-border rounded-2xl p-4 flex flex-col justify-between">
           <p className="text-sm text-muted mb-2">Visibility</p>
+          <div className="flex flex-col items-center justify-center flex-1 mr-5 mb-3">
+            <svg width="160" height="80" viewBox="0 0 160 80" fill="none">
+              {/* Cone lines from apex (left) spreading right */}
+              <line
+                x1="30"
+                y1="40"
+                x2="130"
+                y2="10"
+                stroke="white"
+                strokeOpacity="0.7"
+                strokeWidth="1.2"
+              />
+              <line
+                x1="30"
+                y1="40"
+                x2="130"
+                y2="70"
+                stroke="white"
+                strokeOpacity="0.7"
+                strokeWidth="1.2"
+              />
 
-          <div className="flex flex-col items-center justify-center flex-1">
-            <svg width="120" height="60" viewBox="0 0 120 60">
+              {/* Arcs — centered on apex point (30, 40), curving right */}
+              {/* Mid-outer arc */}
               <path
-                d="M10 50 Q60 10 110 50"
+                d="M 115 16 A 88 88 0 0 1 115 64"
                 stroke="white"
-                strokeOpacity="0.2"
-                fill="none"
+                strokeOpacity="0.9"
+                strokeWidth="1.5"
               />
+              {/* Mid arc */}
               <path
-                d="M20 50 Q60 20 100 50"
+                d="M 100 22 A 72 72 0 0 1 100 58"
                 stroke="white"
-                strokeOpacity="0.3"
-                fill="none"
+                strokeOpacity="0.9"
+                strokeWidth="1"
               />
+              {/* Inner white arc */}
               <path
-                d="M30 50 Q60 30 90 50"
-                stroke="white"
-                strokeOpacity="0.5"
-                fill="none"
-              />
-              <path
-                d="M40 50 Q60 35 80 50"
-                stroke="red"
-                strokeWidth="2"
-                fill="none"
+                d="M 85 28 A 57 57 0 0 1 85 52"
+                stroke="#E5161F"
+                strokeOpacity="0.9"
+                strokeWidth="1.5"
               />
             </svg>
           </div>
-
           <p className="text-sm text-white">
             04 km{" "}
             <span className="text-muted">• Haze is affecting visibility</span>
