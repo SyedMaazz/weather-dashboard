@@ -31,7 +31,6 @@ export default function OtherCitiesPanel() {
 
   return (
     <section className="mt-6">
-      {/* HEADER */}
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg text-white">Other Cities</h3>
         <button className="text-xs text-muted hover:text-white transition-colors duration-150">
@@ -39,7 +38,6 @@ export default function OtherCitiesPanel() {
         </button>
       </div>
 
-      {/* CITY CARDS */}
       <div className="space-y-3">
         {cities.map((c) => (
           <div
@@ -55,7 +53,6 @@ export default function OtherCitiesPanel() {
               will-change-transform
             "
           >
-            {/* LEFT TEXT */}
             <div>
               <p className="text-[10px] text-muted">{c.country}</p>
               <p className="text-sm font-medium text-white transition-colors duration-150 group-hover:text-white">
@@ -64,7 +61,6 @@ export default function OtherCitiesPanel() {
               <p className="text-xs text-muted">{c.condition}</p>
             </div>
 
-            {/* RIGHT ICON */}
             <div
               className="
                 text-white/80
