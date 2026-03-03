@@ -1,6 +1,6 @@
 import TopBar from "@/components/TopBar";
 import ForecastStrip from "@/components/ForecastStrip";
-import RainPanel from "@/components/RainPanel";
+import RainPanel from "@/components/DotCanvas";
 import TodayOverview from "@/components/TodayOverview";
 import MapCTA from "@/components/MapCTA";
 import OtherCitiesPanel from "@/components/OtherCitiesPanel";
