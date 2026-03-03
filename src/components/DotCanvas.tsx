@@ -8,7 +8,6 @@ const TRAIL_REACH = GAP * 1.5;
 const HEAD_REACH = GAP * 1.8;
 const SHRINK_RADIUS = GAP * 4;
 
-// Tight cloud — 6 rows × 10 cols, no padding
 const CLOUD_SHAPE = [
   [0,0,0,1,1,1,0,0,0,0],
   [0,0,1,1,1,1,1,1,0,0],
@@ -24,10 +23,13 @@ export default function DotCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const trailRef = useRef<{ x: number; y: number }[]>([]);
+  const mouseRef = useRef<{ x: number; y: number } | null>(null);
   const [, forceRender] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
   const [dims, setDims] = useState({ w: 0, h: 0 });
+
+  // Refs to each cloud circle DOM node for direct r manipulation
+  const cloudCircleRefs = useRef<Map<string, SVGCircleElement>>(new Map());
 
   useEffect(() => {
     const el = containerRef.current;
@@ -45,33 +47,25 @@ export default function DotCanvas() {
   const VW = COLS * GAP;
   const VH = ROWS * GAP;
 
-  // Center cloud in grid — recompute when dims change
-  const CLOUD_DOTS = useMemo(() => {
+  const { CLOUD_DOTS, cloudDotPositions } = useMemo(() => {
     const set = new Set<string>();
-    if (COLS === 0 || ROWS === 0) return set;
+    const positions = new Map<string, { cx: number; cy: number }>();
+    if (COLS === 0 || ROWS === 0) return { CLOUD_DOTS: set, cloudDotPositions: positions };
     const offsetR = Math.floor((ROWS - CLOUD_SHAPE_ROWS) / 2);
     const offsetC = Math.floor((COLS - CLOUD_SHAPE_COLS) / 2);
     for (let ri = 0; ri < CLOUD_SHAPE_ROWS; ri++) {
       for (let ci = 0; ci < CLOUD_SHAPE_COLS; ci++) {
         if (CLOUD_SHAPE[ri][ci] === 1) {
-          set.add(`${ri + offsetR}-${ci + offsetC}`);
+          const key = `${ri + offsetR}-${ci + offsetC}`;
+          set.add(key);
+          positions.set(key, {
+            cx: (ci + offsetC) * GAP + GAP / 2,
+            cy: (ri + offsetR) * GAP + GAP / 2,
+          });
         }
       }
     }
-    return set;
-  }, [COLS, ROWS]);
-
-  // Bounding box of cloud in SVG units for masking
-  const cloudMask = useMemo(() => {
-    if (COLS === 0 || ROWS === 0) return { x: 0, y: 0, w: 0, h: 0 };
-    const offsetR = Math.floor((ROWS - CLOUD_SHAPE_ROWS) / 2);
-    const offsetC = Math.floor((COLS - CLOUD_SHAPE_COLS) / 2);
-    return {
-      x: offsetC * GAP,
-      y: offsetR * GAP,
-      w: CLOUD_SHAPE_COLS * GAP,
-      h: CLOUD_SHAPE_ROWS * GAP,
-    };
+    return { CLOUD_DOTS: set, cloudDotPositions: positions };
   }, [COLS, ROWS]);
 
   const toSVG = useCallback((e: React.MouseEvent) => {
@@ -83,16 +77,38 @@ export default function DotCanvas() {
     return pt.matrixTransform(svg.getScreenCTM()!.inverse());
   }, []);
 
+  // Directly update cloud circle r values via DOM — no React re-render needed
+  const updateCloudShrink = useCallback((pos: { x: number; y: number } | null) => {
+    cloudCircleRefs.current.forEach((el, key) => {
+      const dotPos = cloudDotPositions.get(key);
+      if (!dotPos) return;
+      if (!pos) {
+        el.setAttribute("r", String(DOT_R));
+        return;
+      }
+      const dist = Math.hypot(dotPos.cx - pos.x, dotPos.cy - pos.y);
+      if (dist < SHRINK_RADIUS) {
+        const t = Math.cos((dist / SHRINK_RADIUS) * (Math.PI / 2));
+        el.setAttribute("r", String(DOT_R * (1 - 0.85 * t)));
+      } else {
+        el.setAttribute("r", String(DOT_R));
+      }
+    });
+  }, [cloudDotPositions]);
+
   const onMove = useCallback((e: React.MouseEvent) => {
     const pos = toSVG(e);
     if (!pos) return;
-    setMouse(pos);
+    mouseRef.current = pos;
+    // Update cloud shrink directly via DOM — instant, no re-render
+    updateCloudShrink(pos);
     trailRef.current = [pos, ...trailRef.current].slice(0, TRAIL_LENGTH);
     forceRender(n => n + 1);
-  }, [toSVG]);
+  }, [toSVG, updateCloudShrink]);
 
   const onLeave = useCallback(() => {
-    setMouse(null);
+    mouseRef.current = null;
+    updateCloudShrink(null);
     const decay = () => {
       if (trailRef.current.length === 0) return;
       trailRef.current = trailRef.current.slice(0, -1);
@@ -100,7 +116,7 @@ export default function DotCanvas() {
       timerRef.current = setTimeout(decay, 40);
     };
     decay();
-  }, []);
+  }, [updateCloudShrink]);
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
@@ -115,7 +131,6 @@ export default function DotCanvas() {
         const cx = ci * GAP + GAP / 2;
         const cy = ri * GAP + GAP / 2;
         let bestScore = 0;
-
         trail.forEach((pt, idx) => {
           const dist = Math.hypot(cx - pt.x, cy - pt.y);
           if (dist < TRAIL_REACH) {
@@ -123,43 +138,33 @@ export default function DotCanvas() {
             if (score > bestScore) bestScore = score;
           }
         });
-
         const headDist = Math.hypot(cx - trail[0].x, cy - trail[0].y);
         if (headDist < HEAD_REACH && bestScore < 1) bestScore = 1;
-
         if (bestScore > 0) dotMap.set(key, bestScore);
       }
     }
   }
 
   const bgDots: React.ReactNode[] = [];
-  const cloudDots: React.ReactNode[] = [];
+  const cloudDotsNodes: React.ReactNode[] = [];
 
   for (let ri = 0; ri < ROWS; ri++) {
     for (let ci = 0; ci < COLS; ci++) {
       const key = `${ri}-${ci}`;
       const cx = ci * GAP + GAP / 2;
       const cy = ri * GAP + GAP / 2;
-      const isCloud = CLOUD_DOTS.has(key);
 
-      if (isCloud) {
-        // Cloud dots always rendered on top
-        // Use trail[0] (updated via ref, no state lag) for instant shrink response
-        let r = DOT_R;
-        let transition = "r 0.3s ease-out";
-        const cursorPos = trail.length > 0 ? trail[0] : null;
-        if (cursorPos) {
-          const dist = Math.hypot(cx - cursorPos.x, cy - cursorPos.y);
-          if (dist < SHRINK_RADIUS) {
-            const t = Math.cos((dist / SHRINK_RADIUS) * (Math.PI / 2));
-            r = DOT_R * (1 - 0.85 * t);
-            transition = "r 0.06s ease-in";
-          }
-        }
-        cloudDots.push(
-          <circle key={key} cx={cx} cy={cy} r={r}
+      if (CLOUD_DOTS.has(key)) {
+        cloudDotsNodes.push(
+          <circle
+            key={key}
+            ref={(el) => {
+              if (el) cloudCircleRefs.current.set(key, el);
+              else cloudCircleRefs.current.delete(key);
+            }}
+            cx={cx} cy={cy}
+            r={DOT_R}
             fill="white" fillOpacity={1}
-            style={{ transition }}
           />
         );
       } else {
@@ -181,7 +186,6 @@ export default function DotCanvas() {
       }
     }
   }
-  // kept separate for layered rendering
 
   return (
     <section className="h-[283.5px] overflow-hidden">
@@ -198,13 +202,11 @@ export default function DotCanvas() {
           >
             <rect width={VW} height={VH} fill="transparent" />
             {bgDots}
-            {/* Black mask over cloud area so trail never shows through */}
-            <rect
-              x={cloudMask.x} y={cloudMask.y}
-              width={cloudMask.w} height={cloudMask.h}
-              fill="black"
-            />
-            {cloudDots}
+            {/* Per-dot black mask circles — covers exactly where cloud dots sit */}
+            {Array.from(cloudDotPositions.entries()).map(([key, pos]) => (
+              <circle key={"mask-" + key} cx={pos.cx} cy={pos.cy} r={DOT_R + 2} fill="black" />
+            ))}
+            {cloudDotsNodes}
           </svg>
         )}
       </div>
