@@ -1,17 +1,9 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import type { LatLngExpression } from "leaflet";
-import "leaflet/dist/leaflet.css";
 
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((m) => m.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((m) => m.TileLayer),
-  { ssr: false }
-);
+// Dynamically import the entire map component — avoids SSR + prop type issues
+const LeafletMap = dynamic(() => import("./leaflet-map"), { ssr: false });
 
 interface MapCTAProps {
   lat?: number;
@@ -19,24 +11,12 @@ interface MapCTAProps {
 }
 
 export default function MapCTA({ lat = 26.8467, lon = 80.9462 }: MapCTAProps) {
-  const center: LatLngExpression = [lat, lon];
   const [showIntro, setShowIntro] = useState(true);
 
   return (
     <div className="relative h-full w-full rounded-2xl overflow-hidden border border-border">
-      <MapContainer
-        key={`${lat.toFixed(4)}-${lon.toFixed(4)}`}
-        center={center}
-        zoom={10}
-        scrollWheelZoom={false}
-        className="h-full w-full map-container"
-      >
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-      </MapContainer>
-      {/* Intro overlay — shown once, dismissed on GET STARTED */}
+      <LeafletMap lat={lat} lon={lon} />
+
       {showIntro && (
         <div className="absolute inset-0 flex flex-col justify-between p-6 bg-black/30 pointer-events-none">
           <div className="bg-white/80 text-black text-sm font-medium rounded-xl px-4 py-2 w-fit backdrop-blur">
