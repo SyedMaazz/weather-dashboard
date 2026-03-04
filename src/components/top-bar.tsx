@@ -1,6 +1,6 @@
 "use client";
 import { MapPin, Search, Moon, Cog, Loader2 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 function IconButton({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
   return (
@@ -32,11 +32,26 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [fetchingDropdown, setFetchingDropdown] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0); // 0 = first item pre-selected
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const locationLabel = [city, state].filter(Boolean).join(", ");
+
+  // Reset active index to 0 (first item) whenever suggestions change
+  useEffect(() => {
+    setActiveIndex(0);
+    itemRefs.current = [];
+  }, [suggestions]);
+
+  // Scroll active item into view
+  useEffect(() => {
+    if (showDropdown && itemRefs.current[activeIndex]) {
+      itemRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
+    }
+  }, [activeIndex, showDropdown]);
 
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -77,6 +92,7 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query]);
 
+  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -88,15 +104,40 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleSelect = (s: Suggestion) => {
+  const handleSelect = useCallback((s: Suggestion) => {
     onSearch(s.name);
     setQuery("");
     setShowDropdown(false);
     inputRef.current?.blur();
+  }, [onSearch]);
+
+  // Keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showDropdown || suggestions.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (suggestions[activeIndex]) {
+        handleSelect(suggestions[activeIndex]);
+      }
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // If dropdown is open, select the active item
+    if (showDropdown && suggestions[activeIndex]) {
+      handleSelect(suggestions[activeIndex]);
+      return;
+    }
     const trimmed = query.trim();
     if (trimmed) {
       onSearch(trimmed);
@@ -115,7 +156,7 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
           <span className="font-dot tracking-[0.08em] text-sm">nothing weather</span>
         </div>
 
-        {/* CENTER — LOCATION (click to geolocate) */}
+        {/* CENTER — LOCATION */}
         <button
           onClick={onLocate}
           className="flex items-center gap-2 text-sm font-dot ml-20 tracking-[0.14em] hover:text-white/70 transition-colors duration-150"
@@ -143,6 +184,7 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+                onKeyDown={handleKeyDown}
                 placeholder="Search City"
                 className="bg-transparent outline-none text-sm w-full pr-4 placeholder:text-black/60"
                 autoComplete="off"
@@ -157,10 +199,19 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
                 {suggestions.map((s, i) => (
                   <button
                     key={i}
+                    ref={(el) => { itemRefs.current[i] = el; }}
                     onMouseDown={() => handleSelect(s)}
-                    className="w-full text-left px-4 py-3 text-sm text-white/80 hover:bg-white/[0.06] hover:text-white transition-colors border-b border-white/[0.06] last:border-0 flex items-center gap-2"
+                    onMouseEnter={() => setActiveIndex(i)}
+                    className={`w-full text-left px-4 py-3 text-sm transition-colors border-b border-white/[0.06] last:border-0 flex items-center gap-2 ${
+                      i === activeIndex
+                        ? "bg-white/[0.08] text-white"
+                        : "text-white/70 hover:bg-white/[0.04] hover:text-white"
+                    }`}
                   >
-                    <MapPin size={12} className="text-white/30 shrink-0" />
+                    <MapPin
+                      size={12}
+                      className={i === activeIndex ? "text-white/60 shrink-0" : "text-white/25 shrink-0"}
+                    />
                     <span>
                       <span className="font-medium text-white">{s.name}</span>
                       <span className="text-white/40 ml-2 text-xs">
@@ -169,6 +220,19 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
                     </span>
                   </button>
                 ))}
+
+                {/* keyboard hint */}
+                <div className="px-4 py-2 flex items-center gap-3 border-t border-white/[0.06]">
+                  <span className="text-[10px] text-white/25 flex items-center gap-1">
+                    <kbd className="px-1 py-0.5 bg-white/10 rounded text-[9px]">↑↓</kbd> navigate
+                  </span>
+                  <span className="text-[10px] text-white/25 flex items-center gap-1">
+                    <kbd className="px-1 py-0.5 bg-white/10 rounded text-[9px]">↵</kbd> select
+                  </span>
+                  <span className="text-[10px] text-white/25 flex items-center gap-1">
+                    <kbd className="px-1 py-0.5 bg-white/10 rounded text-[9px]">esc</kbd> close
+                  </span>
+                </div>
               </div>
             )}
           </div>
