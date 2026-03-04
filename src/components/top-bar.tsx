@@ -32,6 +32,7 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [fetchingDropdown, setFetchingDropdown] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0); // 0 = first item pre-selected
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -107,6 +108,7 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
   const handleSelect = useCallback((s: Suggestion) => {
     onSearch(s.name);
     setQuery("");
+    setSuggestions([]);
     setShowDropdown(false);
     inputRef.current?.blur();
   }, [onSearch]);
@@ -133,18 +135,17 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // If dropdown is open, select the active item
     if (showDropdown && suggestions[activeIndex]) {
       handleSelect(suggestions[activeIndex]);
-      return;
+    } else {
+      const trimmed = query.trim();
+      if (trimmed) onSearch(trimmed);
     }
-    const trimmed = query.trim();
-    if (trimmed) {
-      onSearch(trimmed);
-      setQuery("");
-      setShowDropdown(false);
-      inputRef.current?.blur();
-    }
+    setQuery("");
+    setSuggestions([]);
+    setShowDropdown(false);
+    // Defer blur so React finishes state updates first
+    setTimeout(() => inputRef.current?.blur(), 0);
   };
 
   return (
@@ -183,7 +184,19 @@ export default function TopBar({ city, state, onSearch, onLocate, loading }: Top
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+                onFocus={() => {
+                  setIsFocused(true);
+                  if (suggestions.length > 0 && query.trim().length >= 2) setShowDropdown(true);
+                }}
+                onBlur={() => {
+                  // Small delay so onMouseDown on dropdown items fires first
+                  setTimeout(() => {
+                    setIsFocused(false);
+                    setShowDropdown(false);
+                    setQuery("");
+                    setSuggestions([]);
+                  }, 150);
+                }}
                 onKeyDown={handleKeyDown}
                 placeholder="Search City"
                 className="bg-transparent outline-none text-sm w-full pr-4 placeholder:text-black/60"
