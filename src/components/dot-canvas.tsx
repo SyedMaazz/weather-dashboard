@@ -19,7 +19,11 @@ const CLOUD_SHAPE = [
 const CLOUD_SHAPE_ROWS = 6;
 const CLOUD_SHAPE_COLS = 10;
 
-export default function DotCanvas() {
+interface DotCanvasProps {
+  weatherCode?: number;
+}
+
+export default function DotCanvas({ weatherCode }: DotCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const trailRef = useRef<{ x: number; y: number }[]>([]);
@@ -27,16 +31,12 @@ export default function DotCanvas() {
   const [, forceRender] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [dims, setDims] = useState({ w: 0, h: 0 });
-
-  // Refs to each cloud circle DOM node for direct r manipulation
   const cloudCircleRefs = useRef<Map<string, SVGCircleElement>>(new Map());
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => {
-      setDims({ w: el.clientWidth, h: el.clientHeight });
-    });
+    const ro = new ResizeObserver(() => setDims({ w: el.clientWidth, h: el.clientHeight }));
     ro.observe(el);
     setDims({ w: el.clientWidth, h: el.clientHeight });
     return () => ro.disconnect();
@@ -77,15 +77,11 @@ export default function DotCanvas() {
     return pt.matrixTransform(svg.getScreenCTM()!.inverse());
   }, []);
 
-  // Directly update cloud circle r values via DOM — no React re-render needed
   const updateCloudShrink = useCallback((pos: { x: number; y: number } | null) => {
     cloudCircleRefs.current.forEach((el, key) => {
       const dotPos = cloudDotPositions.get(key);
       if (!dotPos) return;
-      if (!pos) {
-        el.setAttribute("r", String(DOT_R));
-        return;
-      }
+      if (!pos) { el.setAttribute("r", String(DOT_R)); return; }
       const dist = Math.hypot(dotPos.cx - pos.x, dotPos.cy - pos.y);
       if (dist < SHRINK_RADIUS) {
         const t = Math.cos((dist / SHRINK_RADIUS) * (Math.PI / 2));
@@ -100,7 +96,6 @@ export default function DotCanvas() {
     const pos = toSVG(e);
     if (!pos) return;
     mouseRef.current = pos;
-    // Update cloud shrink directly via DOM — instant, no re-render
     updateCloudShrink(pos);
     trailRef.current = [pos, ...trailRef.current].slice(0, TRAIL_LENGTH);
     forceRender(n => n + 1);
@@ -156,31 +151,19 @@ export default function DotCanvas() {
 
       if (CLOUD_DOTS.has(key)) {
         cloudDotsNodes.push(
-          <circle
-            key={key}
-            ref={(el) => {
-              if (el) cloudCircleRefs.current.set(key, el);
-              else cloudCircleRefs.current.delete(key);
-            }}
-            cx={cx} cy={cy}
-            r={DOT_R}
-            fill="white" fillOpacity={1}
+          <circle key={key}
+            ref={(el) => { if (el) cloudCircleRefs.current.set(key, el); else cloudCircleRefs.current.delete(key); }}
+            cx={cx} cy={cy} r={DOT_R} fill="white" fillOpacity={1}
           />
         );
       } else {
         const score = dotMap.get(key) || 0;
-        const isHead = trail.length > 0 &&
-          Math.hypot(cx - trail[0].x, cy - trail[0].y) < HEAD_REACH;
+        const isHead = trail.length > 0 && Math.hypot(cx - trail[0].x, cy - trail[0].y) < HEAD_REACH;
         bgDots.push(
           <circle key={key} cx={cx} cy={cy}
             r={score > 0 ? DOT_R : 0}
-            fill="white"
-            fillOpacity={score > 0 ? score : 0}
-            style={{
-              transition: isHead
-                ? "r 0.08s ease-out, fill-opacity 0.08s ease-out"
-                : "r 0.45s ease-out, fill-opacity 0.45s ease-out",
-            }}
+            fill="white" fillOpacity={score > 0 ? score : 0}
+            style={{ transition: isHead ? "r 0.08s ease-out, fill-opacity 0.08s ease-out" : "r 0.45s ease-out, fill-opacity 0.45s ease-out" }}
           />
         );
       }
@@ -191,18 +174,12 @@ export default function DotCanvas() {
     <section className="h-[283.5px] overflow-hidden">
       <div ref={containerRef} className="w-full h-full">
         {dims.w > 0 && (
-          <svg
-            ref={svgRef}
-            width={dims.w}
-            height={dims.h}
-            viewBox={`0 0 ${VW} ${VH}`}
-            onMouseMove={onMove}
-            onMouseLeave={onLeave}
+          <svg ref={svgRef} width={dims.w} height={dims.h} viewBox={`0 0 ${VW} ${VH}`}
+            onMouseMove={onMove} onMouseLeave={onLeave}
             style={{ display: "block", cursor: "none", width: "100%", height: "100%" }}
           >
             <rect width={VW} height={VH} fill="transparent" />
             {bgDots}
-            {/* Per-dot black mask circles — covers exactly where cloud dots sit */}
             {Array.from(cloudDotPositions.entries()).map(([key, pos]) => (
               <circle key={"mask-" + key} cx={pos.cx} cy={pos.cy} r={DOT_R + 2} fill="black" />
             ))}

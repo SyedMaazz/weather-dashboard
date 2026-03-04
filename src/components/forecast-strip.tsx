@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 import { CurrentWeather, DailyForecast } from "@/types/weather";
 
-// ── WMO code → lucide icon ────────────────────────────────────
 function WeatherIcon({ code, isDay = true, size = 24 }: { code: number; isDay?: boolean; size?: number }) {
   const props = { size, strokeWidth: 1.5 };
   if (code === 0) return isDay ? <Sun {...props} /> : <Moon {...props} />;
@@ -20,22 +19,40 @@ function WeatherIcon({ code, isDay = true, size = 24 }: { code: number; isDay?: 
   return <CloudLightning {...props} />;
 }
 
-// ── Day of week ───────────────────────────────────────────────
-function todayLabel(): string {
-  return new Date().toLocaleDateString("en-US", { weekday: "long" });
+// Format current day name in the location's timezone
+function locationDayLabel(timezone: string): string {
+  try {
+    return new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      timeZone: timezone,
+    });
+  } catch {
+    return new Date().toLocaleDateString("en-US", { weekday: "long" });
+  }
 }
 
-function currentTime(): string {
-  return new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+// Format current time in the location's timezone
+function locationTime(timezone: string): string {
+  try {
+    return new Date().toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: timezone,
+    });
+  } catch {
+    return new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  }
 }
 
 interface ForecastStripProps {
   daily: DailyForecast[];
   current: CurrentWeather | null;
   loading: boolean;
+  timezone?: string;
 }
 
-export default function ForecastStrip({ daily, current, loading }: ForecastStripProps) {
+export default function ForecastStrip({ daily, current, loading, timezone = "UTC" }: ForecastStripProps) {
   const [mode, setMode] = useState<"forecast" | "air">("forecast");
   const [activeTab, setActiveTab] = useState<"today" | "tomorrow" | "next">("next");
 
@@ -58,12 +75,10 @@ export default function ForecastStrip({ daily, current, loading }: ForecastStrip
     }
   }, [activeTab]);
 
-  // Skip today (index 0) for the forecast strip cards
   const forecastDays = daily.slice(1, 7);
 
   return (
     <section className="w-full pr-2">
-      {/* TOP ROW */}
       <div className="flex items-center justify-between mb-6">
         <div ref={containerRef} className="relative flex gap-6 text-sm">
           <span
@@ -75,7 +90,7 @@ export default function ForecastStrip({ daily, current, loading }: ForecastStrip
               key={tab}
               ref={tabRefs[tab]}
               onClick={() => setActiveTab(tab)}
-              className={`pb-1 transition-all duration-200 capitalize ${
+              className={`pb-1 transition-all duration-200 ${
                 activeTab === tab
                   ? "text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.6)] -translate-y-[1px]"
                   : "text-muted hover:text-white"
@@ -93,7 +108,6 @@ export default function ForecastStrip({ daily, current, loading }: ForecastStrip
         </div>
       </div>
 
-      {/* CARDS ROW */}
       <div className="flex items-stretch gap-2 w-full">
         {/* TODAY CARD */}
         <div className="w-[340px] bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
@@ -104,8 +118,9 @@ export default function ForecastStrip({ daily, current, loading }: ForecastStrip
           ) : (
             <>
               <div className="flex justify-between text-sm text-white/80">
-                <span>{todayLabel()}</span>
-                <span>{currentTime()}</span>
+                {/* Location-aware day + time */}
+                <span>{locationDayLabel(timezone)}</span>
+                <span>{locationTime(timezone)}</span>
               </div>
               <div className="flex items-center justify-between mt-4">
                 <h2 className="text-5xl font-medium">{current?.temp ?? "--"}°</h2>

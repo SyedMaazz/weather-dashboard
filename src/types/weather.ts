@@ -55,6 +55,7 @@ export interface AirQuality {
 }
 
 export interface WeatherData {
+  timezone: string;   // e.g. "Asia/Dubai"
   coords: Coordinates;
   current: CurrentWeather;
   daily: DailyForecast[];   // 7 days

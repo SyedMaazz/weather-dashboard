@@ -180,5 +180,6 @@ export async function fetchWeather(coords: Coordinates): Promise<WeatherData> {
     daily: dailyForecast,
     hourly: hourlyForecast,
     airQuality,
+    timezone: w.timezone as string,
   };
 }
