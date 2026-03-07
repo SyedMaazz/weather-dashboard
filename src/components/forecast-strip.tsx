@@ -19,6 +19,11 @@ function WeatherIcon({ code, isDay = true, size = 24 }: { code: number; isDay?: 
   return <CloudLightning {...props} />;
 }
 
+function fullDayName(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00");
+  return d.toLocaleDateString("en-US", { weekday: "long" });
+}
+
 function useLocationTime(timezone: string) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -148,7 +153,7 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
                 // Future day — same grid layout as today to keep height identical
                 <>
                   <div className="flex justify-between text-sm text-white/80">
-                    <span>{expandedDay?.day}</span>
+                    <span>{expandedDay ? fullDayName(expandedDay.date) : "--"}</span>
                     <span>{locationTime.time}</span>
                   </div>
                   <div className="flex items-center justify-between mt-4">
