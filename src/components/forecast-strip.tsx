@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import {
   Sun, Moon, Cloud, CloudSun, CloudMoon, CloudRain,
   CloudDrizzle, CloudSnow, CloudLightning, Loader2,
@@ -19,30 +19,45 @@ function WeatherIcon({ code, isDay = true, size = 24 }: { code: number; isDay?: 
   return <CloudLightning {...props} />;
 }
 
-// Format current day name in the location's timezone
-function locationDayLabel(timezone: string): string {
-  try {
-    return new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      timeZone: timezone,
-    });
-  } catch {
-    return new Date().toLocaleDateString("en-US", { weekday: "long" });
-  }
-}
+// Hook that ticks every minute and returns live day + time for a given timezone
+function useLocationTime(timezone: string) {
+  const [now, setNow] = useState(() => new Date());
 
-// Format current time in the location's timezone
-function locationTime(timezone: string): string {
-  try {
-    return new Date().toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: timezone,
-    });
-  } catch {
-    return new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-  }
+  useEffect(() => {
+    // Sync to the next exact minute boundary first
+    const msUntilNextMinute = (60 - new Date().getSeconds()) * 1000 - new Date().getMilliseconds();
+    const initialTimeout = setTimeout(() => {
+      setNow(new Date());
+      // Then tick every 60s
+      const interval = setInterval(() => setNow(new Date()), 60000);
+      return () => clearInterval(interval);
+    }, msUntilNextMinute);
+
+    return () => clearTimeout(initialTimeout);
+  }, []);
+
+  const day = (() => {
+    try {
+      return now.toLocaleDateString("en-US", { weekday: "long", timeZone: timezone });
+    } catch {
+      return now.toLocaleDateString("en-US", { weekday: "long" });
+    }
+  })();
+
+  const time = (() => {
+    try {
+      return now.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: timezone,
+      });
+    } catch {
+      return now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    }
+  })();
+
+  return { day, time };
 }
 
 interface ForecastStripProps {
@@ -53,6 +68,7 @@ interface ForecastStripProps {
 }
 
 export default function ForecastStrip({ daily, current, loading, timezone = "UTC" }: ForecastStripProps) {
+  const locationTime = useLocationTime(timezone);
   const [mode, setMode] = useState<"forecast" | "air">("forecast");
   const [activeTab, setActiveTab] = useState<"today" | "tomorrow" | "next">("next");
 
@@ -118,9 +134,8 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
           ) : (
             <>
               <div className="flex justify-between text-sm text-white/80">
-                {/* Location-aware day + time */}
-                <span>{locationDayLabel(timezone)}</span>
-                <span>{locationTime(timezone)}</span>
+                <span>{locationTime.day}</span>
+                <span>{locationTime.time}</span>
               </div>
               <div className="flex items-center justify-between mt-4">
                 <h2 className="text-5xl font-medium">{current?.temp ?? "--"}°</h2>
