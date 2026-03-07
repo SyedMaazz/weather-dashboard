@@ -19,44 +19,25 @@ function WeatherIcon({ code, isDay = true, size = 24 }: { code: number; isDay?: 
   return <CloudLightning {...props} />;
 }
 
-// Hook that ticks every minute and returns live day + time for a given timezone
 function useLocationTime(timezone: string) {
   const [now, setNow] = useState(() => new Date());
-
   useEffect(() => {
-    // Sync to the next exact minute boundary first
     const msUntilNextMinute = (60 - new Date().getSeconds()) * 1000 - new Date().getMilliseconds();
     const initialTimeout = setTimeout(() => {
       setNow(new Date());
-      // Then tick every 60s
       const interval = setInterval(() => setNow(new Date()), 60000);
       return () => clearInterval(interval);
     }, msUntilNextMinute);
-
     return () => clearTimeout(initialTimeout);
   }, []);
-
   const day = (() => {
-    try {
-      return now.toLocaleDateString("en-US", { weekday: "long", timeZone: timezone });
-    } catch {
-      return now.toLocaleDateString("en-US", { weekday: "long" });
-    }
+    try { return now.toLocaleDateString("en-US", { weekday: "long", timeZone: timezone }); }
+    catch { return now.toLocaleDateString("en-US", { weekday: "long" }); }
   })();
-
   const time = (() => {
-    try {
-      return now.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-        timeZone: timezone,
-      });
-    } catch {
-      return now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-    }
+    try { return now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: timezone }); }
+    catch { return now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }); }
   })();
-
   return { day, time };
 }
 
@@ -71,6 +52,8 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
   const locationTime = useLocationTime(timezone);
   const [mode, setMode] = useState<"forecast" | "air">("forecast");
   const [activeTab, setActiveTab] = useState<"today" | "tomorrow" | "next">("next");
+  // 0 = today is expanded (default), 1-6 = that day from daily[] is expanded
+  const [expandedIndex, setExpandedIndex] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const tabRefs = {
@@ -91,7 +74,11 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
     }
   }, [activeTab]);
 
-  const forecastDays = daily.slice(1, 7);
+  // daily[0] = today, daily[1..6] = next 6 days
+  const allDays = daily.slice(0, 7);
+  // small cards = all 7 days except the expanded one, in original order
+  const smallDays = allDays.filter((_, i) => i !== expandedIndex);
+  const expandedDay = allDays[expandedIndex];
 
   return (
     <section className="w-full pr-2">
@@ -116,7 +103,6 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
             </button>
           ))}
         </div>
-
         <div className="relative flex gap-2 bg-panel border border-border rounded-full p-1">
           <div className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full bg-white transition-transform duration-200 ease-out ${mode === "air" ? "translate-x-full" : "translate-x-0"}`} />
           <button onClick={() => setMode("forecast")} className={`relative z-10 px-4 py-1 text-xs rounded-full transition-colors duration-200 ${mode === "forecast" ? "text-black" : "text-muted"}`}>Forecast</button>
@@ -125,48 +111,79 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
       </div>
 
       <div className="flex items-stretch gap-2 w-full">
-        {/* TODAY CARD */}
+
+        {/* BIG CARD — identical className to original */}
         <div className="w-[340px] bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
               <Loader2 size={24} className="animate-spin text-white/40" />
             </div>
           ) : (
-            <>
-              <div className="flex justify-between text-sm text-white/80">
-                <span>{locationTime.day}</span>
-                <span>{locationTime.time}</span>
-              </div>
-              <div className="flex items-center justify-between mt-4">
-                <h2 className="text-5xl font-medium">{current?.temp ?? "--"}°</h2>
-                <WeatherIcon code={current?.weatherCode ?? 0} isDay={current?.isDay} size={40} />
-              </div>
-              <div className="grid grid-cols-2 gap-4 mt-4 text-xs">
-                <div className="space-y-1 text-white/80">
-                  <p>Real Feel {current?.feelsLike ?? "--"}°</p>
-                  <p className="whitespace-nowrap">Wind {current?.windDirectionLabel} {current?.windSpeed ?? "--"} km/h</p>
-                  <p>Pressure {current?.pressure ?? "--"} MB</p>
-                  <p>Humidity {current?.humidity ?? "--"}%</p>
-                </div>
-                <div className="space-y-1 text-white/80 text-right">
-                  <p>Sunrise {daily[0]?.sunrise ?? "--"}</p>
-                  <p>Sunset {daily[0]?.sunset ?? "--"}</p>
-                </div>
-              </div>
-            </>
+            <div key={expandedIndex} className="flex flex-col justify-between h-full animate-fade-in">
+              {expandedIndex === 0 ? (
+                // Today — exact original markup
+                <>
+                  <div className="flex justify-between text-sm text-white/80">
+                    <span>{locationTime.day}</span>
+                    <span>{locationTime.time}</span>
+                  </div>
+                  <div className="flex items-center justify-between mt-4">
+                    <h2 className="text-5xl font-medium">{current?.temp ?? "--"}°</h2>
+                    <WeatherIcon code={current?.weatherCode ?? 0} isDay={current?.isDay} size={40} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-4 text-xs">
+                    <div className="space-y-1 text-white/80">
+                      <p>Real Feel {current?.feelsLike ?? "--"}°</p>
+                      <p className="whitespace-nowrap">Wind {current?.windDirectionLabel} {current?.windSpeed ?? "--"} km/h</p>
+                      <p>Pressure {current?.pressure ?? "--"} MB</p>
+                      <p>Humidity {current?.humidity ?? "--"}%</p>
+                    </div>
+                    <div className="space-y-1 text-white/80 text-right">
+                      <p>Sunrise {allDays[0]?.sunrise ?? "--"}</p>
+                      <p>Sunset {allDays[0]?.sunset ?? "--"}</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // Future day — same grid layout as today to keep height identical
+                <>
+                  <div className="flex justify-between text-sm text-white/80">
+                    <span>{expandedDay?.day}</span>
+                    <span>{locationTime.time}</span>
+                  </div>
+                  <div className="flex items-center justify-between mt-4">
+                    <h2 className="text-5xl font-medium">{expandedDay?.tempMax ?? "--"}°</h2>
+                    <WeatherIcon code={expandedDay?.weatherCode ?? 0} size={40} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-4 text-xs">
+                    <div className="space-y-1 text-white/80">
+                      <p>Low {expandedDay?.tempMin ?? "--"}°</p>
+                      <p>Rain {expandedDay?.precipitationProbability ?? "--"}%</p>
+                      <p>UV Index {expandedDay?.uvIndexMax ?? "--"}</p>
+                      <p>{expandedDay?.condition ?? "--"}</p>
+                    </div>
+                    <div className="space-y-1 text-white/80 text-right">
+                      <p>Sunrise {expandedDay?.sunrise ?? "--"}</p>
+                      <p>Sunset {expandedDay?.sunset ?? "--"}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           )}
         </div>
 
-        {/* NEXT 6 DAYS */}
+        {/* SMALL CARDS — identical className to original */}
         {loading
           ? Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="w-[150px] bg-panel border border-border rounded-2xl p-4 flex flex-col items-center justify-center">
                 <Loader2 size={16} className="animate-spin text-white/30" />
               </div>
             ))
-          : forecastDays.map((d) => (
-              <div
+          : smallDays.map((d) => (
+              <button
                 key={d.date}
+                onClick={() => setExpandedIndex(allDays.findIndex(day => day.date === d.date))}
                 className="group w-[150px] bg-panel border border-border rounded-2xl p-4 flex flex-col items-center justify-between transition-all duration-150 hover:bg-white/[0.04] hover:border-white/40 transform hover:scale-[1.04] will-change-transform"
               >
                 <p className="text-sm text-white/80 transition-colors duration-150 group-hover:text-white">{d.day}</p>
@@ -174,7 +191,7 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
                   <WeatherIcon code={d.weatherCode} size={24} />
                 </div>
                 <p className="text-lg font-medium transition-colors duration-150 group-hover:text-white">{d.tempMax}°</p>
-              </div>
+              </button>
             ))}
       </div>
     </section>
