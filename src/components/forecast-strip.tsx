@@ -154,7 +154,7 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
                 <>
                   <div className="flex justify-between text-sm text-white/80">
                     <span>{expandedDay ? fullDayName(expandedDay.date) : "--"}</span>
-                    <span>{locationTime.time}</span>
+                    <span>{expandedDay?.date ?? "--"}</span>
                   </div>
                   <div className="flex items-center justify-between mt-4">
                     <h2 className="text-5xl font-medium">{expandedDay?.tempMax ?? "--"}°</h2>
