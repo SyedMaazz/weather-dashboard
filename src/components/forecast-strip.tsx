@@ -156,7 +156,7 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
                   </div>
                   <div className="grid grid-cols-2 gap-4 mt-4 text-xs">
                     <div className="space-y-1 text-white/80">
-                      <p>Loo {expandedDay?.tempMin ?? "--"}°</p>
+                      <p>Low {expandedDay?.tempMin ?? "--"}°</p>
                       <p>Rain {expandedDay?.precipitationProbability ?? "--"}%</p>
                       <p>UV Index {expandedDay?.uvIndexMax ?? "--"}</p>
                       <p>{expandedDay?.condition ?? "--"}</p>
