@@ -57,7 +57,6 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
   const locationTime = useLocationTime(timezone);
   const [mode, setMode] = useState<"forecast" | "air">("forecast");
   const [activeTab, setActiveTab] = useState<"today" | "tomorrow" | "next">("next");
-  // 0 = today is expanded (default), 1-6 = that day from daily[] is expanded
   const [expandedIndex, setExpandedIndex] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,9 +78,7 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
     }
   }, [activeTab]);
 
-  // daily[0] = today, daily[1..6] = next 6 days
   const allDays = daily.slice(0, 7);
-  // small cards = all 7 days except the expanded one, in original order
   const smallDays = allDays.filter((_, i) => i !== expandedIndex);
   const expandedDay = allDays[expandedIndex];
 
@@ -117,7 +114,6 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
 
       <div className="flex items-stretch gap-2 w-full">
 
-        {/* BIG CARD — identical className to original */}
         <div className="w-[340px] bg-panel border border-border rounded-2xl p-6 flex flex-col justify-between">
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
@@ -126,7 +122,6 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
           ) : (
             <div key={expandedIndex} className="flex flex-col justify-between h-full animate-fade-in">
               {expandedIndex === 0 ? (
-                // Today — exact original markup
                 <>
                   <div className="flex justify-between text-sm text-white/80">
                     <span>{locationTime.day}</span>
@@ -150,7 +145,6 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
                   </div>
                 </>
               ) : (
-                // Future day — same grid layout as today to keep height identical
                 <>
                   <div className="flex justify-between text-sm text-white/80">
                     <span>{expandedDay ? fullDayName(expandedDay.date) : "--"}</span>
@@ -162,7 +156,7 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
                   </div>
                   <div className="grid grid-cols-2 gap-4 mt-4 text-xs">
                     <div className="space-y-1 text-white/80">
-                      <p>Low {expandedDay?.tempMin ?? "--"}°</p>
+                      <p>Loo {expandedDay?.tempMin ?? "--"}°</p>
                       <p>Rain {expandedDay?.precipitationProbability ?? "--"}%</p>
                       <p>UV Index {expandedDay?.uvIndexMax ?? "--"}</p>
                       <p>{expandedDay?.condition ?? "--"}</p>
@@ -178,7 +172,6 @@ export default function ForecastStrip({ daily, current, loading, timezone = "UTC
           )}
         </div>
 
-        {/* SMALL CARDS — identical className to original */}
         {loading
           ? Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="w-[150px] bg-panel border border-border rounded-2xl p-4 flex flex-col items-center justify-center">
