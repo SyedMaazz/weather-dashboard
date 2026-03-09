@@ -29,9 +29,24 @@ export default function LeafletMap({ lat, lon }: LeafletMapProps) {
       const map = L.map(mapRef.current!, {
         center: [lat, lon],
         zoom: 10,
-        scrollWheelZoom: true,
-        zoomControl: false, // we render our own buttons
+        scrollWheelZoom: false,
+        touchZoom: true,
+        boxZoom: false,
+        zoomControl: false,
       });
+
+      // Allow two-finger pinch on trackpad (ctrlKey is set for pinch gestures)
+      mapRef.current!.addEventListener("wheel", (e: WheelEvent) => {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          try {
+            if (map && map.getContainer()) {
+              const delta = e.deltaY > 0 ? -1 : 1;
+              map.setZoom(map.getZoom() + delta);
+            }
+          } catch (_) {}
+        }
+      }, { passive: false });
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",
