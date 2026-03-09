@@ -29,7 +29,7 @@ export default function LeafletMap({ lat, lon }: LeafletMapProps) {
       const map = L.map(mapRef.current!, {
         center: [lat, lon],
         zoom: 10,
-        scrollWheelZoom: false,
+        scrollWheelZoom: true,
         zoomControl: false, // we render our own buttons
       });
 
