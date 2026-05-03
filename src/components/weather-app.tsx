@@ -49,7 +49,11 @@ export default function WeatherApp() {
             <DotCanvas weatherCode={weather.data?.current?.weatherCode} />
           </div>
           <div className="mt-[30px]">
-            <OtherCitiesPanel />
+            <OtherCitiesPanel
+              userCountry={weather.data?.coords.country ?? ""}
+              userCity={weather.data?.coords.name ?? ""}
+              onSearch={weather.setCity}
+            />
           </div>
         </div>
       </div>
